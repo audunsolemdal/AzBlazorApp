@@ -27,7 +27,7 @@ namespace AzBlazorApp
                 services.AddRazorPages();
                 services.AddServerSideBlazor();
                 services.AddSingleton<WeatherForecastService>();
-                //services.AddApplicationInsightsTelemetry();
+                services.AddApplicationInsightsTelemetry();
 
                 AddCustomServices(services);
             }
