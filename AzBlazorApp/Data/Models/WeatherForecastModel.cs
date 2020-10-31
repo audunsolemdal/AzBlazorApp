@@ -1,6 +1,6 @@
 using System;
 
-namespace AzBlazorApp.Data
+namespace AzBlazorApp.Data.Models
 {
     public class WeatherForecast
     {

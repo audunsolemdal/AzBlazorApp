@@ -1,10 +1,12 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using AzBlazorApp.Data.Models;
+using AzBlazorApp.Data.Services.Interfaces;
 
-namespace AzBlazorApp.Data
+namespace AzBlazorApp.Data.Services
 {
-    public class WeatherForecastService
+    public class WeatherForecastService : IWeatherForecastService
     {
         private static readonly string[] Summaries = new[]
         {
