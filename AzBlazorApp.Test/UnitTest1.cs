@@ -1,18 +1,8 @@
-using NUnit.Framework;
+using Xunit;
 
 namespace AzBlazorApp.Test
 {
     public class Tests
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
-
-        [Test]
-        public void Test1()
-        {
-            Assert.Pass();
-        }
     }
 }
