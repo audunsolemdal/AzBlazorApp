@@ -5,13 +5,15 @@ using System.Threading.Tasks;
 
 namespace AzBlazorApp.Data.Services.Interfaces
 {
-    interface IBlobStorageService
+    public interface IBlobStorageService
     {
-        BlobServiceClient GetBlobStorageClient(string connString);
-        IList<BlobItem> GetAllBlobs();
-        IList<BlobContainerItem> GetAllContainers();
-        Task UploadContentToContainer(string localFilePath);
-        Task CreateContainer(string name, BlobServiceClient client);
-        Task DeleteContainer(string name, BlobServiceClient client);
+        BlobServiceClient GetBlobServiceClient(string connString);
+        Task<BlobContainerClient> GetBlobContainerClient(BlobServiceClient blobServiceClient, string containerName);
+        BlobClient GetBlobClient(BlobContainerClient blobContainerClient, string containerName);
+        IList<BlobItem> GetAllBlobsInContainer(BlobContainerClient blobContainerClient);
+        IList<BlobContainerItem> GetAllContainers(BlobServiceClient blobServiceClient);
+        void UploadContentToContainer(BlobContainerClient blobContainerClient, string localFilePath, string uploadMode);
+        Task CreateContainer(BlobServiceClient blobServiceClient, string containerName);
+        Task DeleteContainer(BlobServiceClient blobServiceClient, string containerName);
     }
 }

@@ -9,6 +9,8 @@ namespace AzBlazorApp
         protected void AddCustomServices(IServiceCollection services)
         {
             services.AddScoped<IWeatherForecastService, WeatherForecastService>();
+            services.AddScoped<IBlobStorageService, BlobStorageService>();
+            //services.AddScoped<IQueueService, QueueService>();
         }
     }
 }
