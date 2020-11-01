@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using AzBlazorApp.Data.Services.Interfaces;
 using Azure.Storage.Blobs;
@@ -14,34 +15,27 @@ namespace AzBlazorApp.Data.Services
 
         public BlobStorageService(ILogger<BlobStorageService> logger) => this.logger = logger;
 
-        public Task CreateContainer(BlobServiceClient blobServiceClient, string containerName)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task CreateContainer(BlobServiceClient blobServiceClient, string containerName) =>
+            blobServiceClient.CreateBlobContainerAsync(containerName);
 
-        public Task DeleteContainer(BlobServiceClient blobServiceClient, string containerName)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task DeleteContainer(BlobServiceClient blobServiceClient, string containerName) =>
+            blobServiceClient.DeleteBlobContainerAsync(containerName);
 
-        public IList<BlobItem> GetAllBlobsInContainer(BlobContainerClient blobContainerClient)
-        {
-            throw new System.NotImplementedException();
-        }
+        public IList<BlobContainerItem> GetAllContainers(BlobServiceClient blobServiceClient) =>
+            (IList<BlobContainerItem>)blobServiceClient.GetBlobContainersAsync();
 
-        public IList<BlobContainerItem> GetAllContainers(BlobServiceClient blobServiceClient)
-        {
-            throw new System.NotImplementedException();
-        }
+        public IList<BlobItem> GetAllBlobsInContainer(BlobContainerClient blobContainerClient) =>
+            (IList<BlobItem>)blobContainerClient.GetBlobsAsync();
 
         public BlobClient GetBlobClient(BlobContainerClient blobContainerClient, string containerName)
         {
-            throw new System.NotImplementedException();
+            BlobClient blobClient = blobContainerClient.GetBlobClient(containerName);
+            return blobClient;
         }
 
-        public async Task<BlobContainerClient> GetBlobContainerClient(BlobServiceClient blobServiceClient, string containerName)
+        public BlobContainerClient GetBlobContainerClient(BlobServiceClient blobServiceClient, string containerName)
         {
-            var blobContainerClient = await blobServiceClient.CreateBlobContainerAsync(containerName);
+            BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(containerName);
             return blobContainerClient;
         }
 
@@ -51,42 +45,41 @@ namespace AzBlazorApp.Data.Services
             return client;
         }
 
-        public void UploadContentToContainer(BlobContainerClient blobContainerClient, string localPath, string uploadMode)
+        public async Task UploadContentToContainer(BlobContainerClient blobContainerClient, string localPath, string uploadMode)
         {
-            BlobClient blobClient = GetBlobClient(blobContainerClient, "myContainer");
+            string blobName = localPath.Split("/").Last();
+            BlobClient blobClient = GetBlobClient(blobContainerClient, blobName);
 
             if (File.Exists(localPath))
             {
-                UploadBlob(localPath, blobClient);
+                await UploadLocalFileToBlobStorage(localPath, blobClient);
             }
             else if (Directory.Exists(localPath))
             {
-                ProcessDirectory(localPath, uploadMode, blobClient);
+                await ProcessLocalDirectory(localPath, uploadMode, blobClient);
             }
         }
 
-        public void ProcessDirectory(string targetDirectory, string uploadMode, BlobClient blobClient)
+        public async Task ProcessLocalDirectory(string targetDirectory, string uploadMode, BlobClient blobClient)
         {
             // Process the list of files found in the directory.
             string[] fileEntries = Directory.GetFiles(targetDirectory);
             foreach (string fileName in fileEntries)
-                UploadBlob(fileName, blobClient);
+                await UploadLocalFileToBlobStorage(fileName, blobClient);
 
             if (uploadMode == "Recursive")
             {
                 // Recurse into subdirectories of this directory.
                 string[] subdirectoryEntries = Directory.GetDirectories(targetDirectory);
                 foreach (string subdirectory in subdirectoryEntries)
-                    ProcessDirectory(subdirectory, uploadMode, blobClient);
+                    await ProcessLocalDirectory(subdirectory, uploadMode, blobClient);
             }
         }
 
-        public static void UploadBlob(string localPath, BlobClient blobClient)
+        public async Task UploadLocalFileToBlobStorage(string localPath, BlobClient blobClient)
         {
-            using (FileStream uploadBlobStream = File.OpenRead(localPath))
-            {
-                blobClient.UploadAsync(uploadBlobStream, true);
-            }
+            using FileStream fileStream = File.OpenRead(localPath);
+            await blobClient.UploadAsync(fileStream, true);
 
             // ("Processed file '{0}'.", path);
         }
