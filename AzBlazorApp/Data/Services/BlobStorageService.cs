@@ -1,11 +1,9 @@
-﻿using AzBlazorApp.Data.Services.Interfaces;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
+using AzBlazorApp.Data.Services.Interfaces;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Logging;
 
 namespace AzBlazorApp.Data.Services
@@ -14,10 +12,7 @@ namespace AzBlazorApp.Data.Services
     {
         private readonly ILogger<BlobStorageService> logger;
 
-        public BlobStorageService(ILogger<BlobStorageService> logger)
-        {
-            this.logger = logger;
-        }
+        public BlobStorageService(ILogger<BlobStorageService> logger) => this.logger = logger;
 
         public Task CreateContainer(BlobServiceClient blobServiceClient, string containerName)
         {
@@ -58,7 +53,7 @@ namespace AzBlazorApp.Data.Services
 
         public void UploadContentToContainer(BlobContainerClient blobContainerClient, string localPath, string uploadMode)
         {
-            var blobClient = GetBlobClient(blobContainerClient, "myContainer");
+            BlobClient blobClient = GetBlobClient(blobContainerClient, "myContainer");
 
             if (File.Exists(localPath))
             {
@@ -70,7 +65,7 @@ namespace AzBlazorApp.Data.Services
             }
         }
 
-        public static void ProcessDirectory(string targetDirectory, string uploadMode, BlobClient blobClient)
+        public void ProcessDirectory(string targetDirectory, string uploadMode, BlobClient blobClient)
         {
             // Process the list of files found in the directory.
             string[] fileEntries = Directory.GetFiles(targetDirectory);
@@ -88,13 +83,12 @@ namespace AzBlazorApp.Data.Services
 
         public static void UploadBlob(string localPath, BlobClient blobClient)
         {
-            using (FileStream UploadBlobStream = File.OpenRead(localPath))
+            using (FileStream uploadBlobStream = File.OpenRead(localPath))
             {
-                blobClient.UploadAsync(UploadBlobStream, true);
+                blobClient.UploadAsync(uploadBlobStream, true);
             }
 
             // ("Processed file '{0}'.", path);
-
         }
     }
 }

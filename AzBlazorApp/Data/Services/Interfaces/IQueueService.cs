@@ -1,7 +1,6 @@
-﻿namespace AzBlazorApp.Data.Services.Interfaces
+namespace AzBlazorApp.Data.Services.Interfaces
 {
     public class IQueueService
     {
-
     }
 }

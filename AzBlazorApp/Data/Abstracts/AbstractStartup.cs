@@ -1,6 +1,6 @@
-using Microsoft.Extensions.DependencyInjection;
 using AzBlazorApp.Data.Services;
 using AzBlazorApp.Data.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AzBlazorApp
 {
@@ -10,7 +10,7 @@ namespace AzBlazorApp
         {
             services.AddScoped<IWeatherForecastService, WeatherForecastService>();
             services.AddScoped<IBlobStorageService, BlobStorageService>();
-            //services.AddScoped<IQueueService, QueueService>();
+            // services.AddScoped<IQueueService, QueueService>();
         }
     }
 }
