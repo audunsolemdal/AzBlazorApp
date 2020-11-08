@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using AzBlazorApp.Data.Services.Interfaces;
 using Azure.Storage.Blobs;
@@ -12,6 +13,7 @@ namespace AzBlazorApp.Data.Services
     public class BlobStorageService : IBlobStorageService
     {
         private readonly ILogger<BlobStorageService> logger;
+        private BlobContentInfo response;
 
         public BlobStorageService(ILogger<BlobStorageService> logger) => this.logger = logger;
 
@@ -45,19 +47,29 @@ namespace AzBlazorApp.Data.Services
             return client;
         }
 
-        public async Task UploadContentToContainer(BlobContainerClient blobContainerClient, string localPath, string uploadMode)
+        public async Task<BlobContentInfo> UploadContentToContainer(BlobContainerClient blobContainerClient, string localPath, string uploadMode)
         {
-            string blobName = localPath.Split("/").Last();
+            string blobName;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                blobName = localPath.Split('\\').Last();
+            }
+            else
+            {
+                blobName = localPath.Split('/').Last();
+            }
+
             BlobClient blobClient = GetBlobClient(blobContainerClient, blobName);
 
             if (File.Exists(localPath))
             {
-                await UploadLocalFileToBlobStorage(localPath, blobClient);
+                response = await UploadLocalFileToBlobStorage(localPath, blobClient);
             }
             else if (Directory.Exists(localPath))
             {
                 await ProcessLocalDirectory(localPath, uploadMode, blobClient);
             }
+            return response;
         }
 
         public async Task ProcessLocalDirectory(string targetDirectory, string uploadMode, BlobClient blobClient)
@@ -76,12 +88,17 @@ namespace AzBlazorApp.Data.Services
             }
         }
 
-        public async Task UploadLocalFileToBlobStorage(string localPath, BlobClient blobClient)
+        public async Task<BlobContentInfo> UploadLocalFileToBlobStorage(string localPath, BlobClient blobClient)
         {
             using FileStream fileStream = File.OpenRead(localPath);
-            await blobClient.UploadAsync(fileStream, true);
+            return await blobClient.UploadAsync(fileStream, true);
 
             // ("Processed file '{0}'.", path);
+        }
+
+        Task IBlobStorageService.UploadContentToContainer(BlobContainerClient blobContainerClient, string localFilePath, string uploadMode)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

@@ -16,6 +16,6 @@ namespace AzBlazorApp.Data.Services.Interfaces
         BlobServiceClient GetBlobServiceClient(string connString);
         Task UploadContentToContainer(BlobContainerClient blobContainerClient, string localFilePath, string uploadMode);
         Task ProcessLocalDirectory(string targetDirectory, string uploadMode, BlobClient blobClient);
-        Task UploadLocalFileToBlobStorage(string localPath, BlobClient blobClient);
+        Task<BlobContentInfo> UploadLocalFileToBlobStorage(string localPath, BlobClient blobClient);
     }
 }
